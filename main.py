@@ -2,29 +2,33 @@ import os
 import sys
 from pyspark.sql import SparkSession
 
-# Фікс для коректної роботи PySpark до віртуального середовиша .venv в Pycharm
+from read_Taxi import extract_taxi_data
+
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
-# Ініціалізація SparkSession
-spark = SparkSession.builder \
-    .appName("NYC Taxi Data Test") \
-    .getOrCreate()
+def main():
+    spark = SparkSession.builder \
+        .appName("NYC Taxi Data Extraction") \
+        .getOrCreate()
 
-# Шлях до файлу
-file_path = "database/Taxi/trip_data/trip_data_1.csv"
-print(f"Зчитування файлу: {file_path}")
+    # Вказуємо шляхи до папок
+    trip_data_path = "database/Taxi/trip_data/trip_data_1.csv"
+    trip_fare_path = "database/Taxi/trip_fare/trip_fare_1.csv"
 
-# Створення DataFrame з зчитуванням заголовків та автоматичним визначенням типів
-df = spark.read.csv(file_path, header=True, inferSchema=True)
+    print("Початок видобування даних")
 
-# Виведення перших 20 рядків на екран [cite: 55]
-print("\nТестовий DataFrame (trip_data_1.csv)")
-df.show()
+    # Виклик функції з функції
+    df_trips, df_fares = extract_taxi_data(spark, trip_data_path, trip_fare_path)
 
-# Виведення структури колонок
-print("\nСхема даних")
-df.printSchema()
+    # Перевірка зчитування дією (виведення 5 рядків)
+    print("\nДані про поїздки (Trips)")
+    df_trips.show(5)
 
-# Завершення роботи
-spark.stop()
+    print("\nДані про оплату (Fares)")
+    df_fares.show(5)
+
+    spark.stop()
+
+if __name__ == "__main__":
+    main()
