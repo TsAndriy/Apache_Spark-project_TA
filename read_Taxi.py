@@ -9,19 +9,19 @@ def extract_taxi_data(spark, trip_data_path, trip_fare_path):
     # Схема для файлів trip_data (дані про поїздки)
     trip_data_schema = StructType([
         StructField("medallion", StringType(), True),
-        StructField("hack_license", StringType(), True),
-        StructField("vendor_id", StringType(), True),
-        StructField("rate_code", IntegerType(), True),
-        StructField("store_and_fwd_flag", StringType(), True),
-        StructField("pickup_datetime", TimestampType(), True),
-        StructField("dropoff_datetime", TimestampType(), True),
-        StructField("passenger_count", IntegerType(), True),
-        StructField("trip_time_in_secs", IntegerType(), True),
-        StructField("trip_distance", DoubleType(), True),
-        StructField("pickup_longitude", DoubleType(), True),
-        StructField("pickup_latitude", DoubleType(), True),
-        StructField("dropoff_longitude", DoubleType(), True),
-        StructField("dropoff_latitude", DoubleType(), True)
+        StructField(" hack_license", StringType(), True),
+        StructField(" vendor_id", StringType(), True),
+        StructField(" rate_code", IntegerType(), True),
+        StructField(" store_and_fwd_flag", StringType(), True),
+        StructField(" pickup_datetime", TimestampType(), True),
+        StructField(" dropoff_datetime", TimestampType(), True),
+        StructField(" passenger_count", IntegerType(), True),
+        StructField(" trip_time_in_secs", IntegerType(), True),
+        StructField(" trip_distance", DoubleType(), True),
+        StructField(" pickup_longitude", DoubleType(), True),
+        StructField(" pickup_latitude", DoubleType(), True),
+        StructField(" dropoff_longitude", DoubleType(), True),
+        StructField(" dropoff_latitude", DoubleType(), True)
     ])
 
     # Схема для файлів trip_fare (дані про оплату)
@@ -51,5 +51,7 @@ def extract_taxi_data(spark, trip_data_path, trip_fare_path):
         header=True,
         schema=trip_fare_schema
     )
+    df_trips = df_trips.toDF(*[c.strip() for c in df_trips.columns])
+    df_fares = df_fares.toDF(*[c.strip() for c in df_fares.columns])
 
     return df_trips, df_fares
