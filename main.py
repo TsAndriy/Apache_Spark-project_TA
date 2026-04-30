@@ -4,9 +4,16 @@ import sys
 from pyspark.sql import SparkSession
 
 from read_Taxi import extract_taxi_data
+from save_r import save_all_results
+from transformations import run_transformations
 from preprocessing import get_general_statistics, cast_and_parse_data, drop_non_informative_features, \
-    analyze_missing_and_duplicates
+    analyze_missing_and_duplicates, preprocess_data
 os.environ['HADOOP_HOME'] = 'C:\\hadoop'
+
+# 2. Додаємо папку C:\hadoop\bin до системної змінної PATH
+hadoop_bin_path = os.path.join(os.environ['HADOOP_HOME'], 'bin')
+os.environ['PATH'] = hadoop_bin_path + os.pathsep + os.environ.get('PATH', '')
+
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
@@ -39,14 +46,19 @@ def main():
 
     # Виклик функції з функції
     df_trips, df_fares = extract_taxi_data(spark, trip_data_files, trip_fare_files)
-    get_general_statistics(df_trips, df_fares)
+    # get_general_statistics(df_trips, df_fares)
+    #
+    # df_trips, df_fares = cast_and_parse_data(df_trips, df_fares)
+    #
+    # df_trips, df_fares = drop_non_informative_features(df_trips, df_fares)
+    #
+    # df_trips, df_fares = analyze_missing_and_duplicates(df_trips, df_fares)
 
-    df_trips, df_fares = cast_and_parse_data(df_trips, df_fares)
+    df_trips, df_fares = preprocess_data(df_trips, df_fares)
 
-    df_trips, df_fares = drop_non_informative_features(df_trips, df_fares)
+    q1, q2, q3, q4, q5, q6 = run_transformations(df_trips, df_fares)
 
-    df_trips, df_fares = analyze_missing_and_duplicates(df_trips, df_fares)
-
+    save_all_results(q1, q2, q3, q4, q5, q6)
 
     spark.stop()
 

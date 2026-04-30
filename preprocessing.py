@@ -150,3 +150,31 @@ def analyze_missing_and_duplicates(df_trips, df_fares):
     df_fares.select(*fares_missing_exprs).show(vertical=True)
 
     return df_trips, df_fares
+
+
+def preprocess_data(df_trips, df_fares):
+    df_trips = df_trips.withColumn("pickup_hour", F.hour("pickup_datetime")) \
+        .withColumn("pickup_day_of_week", F.dayofweek("pickup_datetime")) \
+        .withColumn("pickup_month", F.month("pickup_datetime"))
+
+    min_lon, max_lon = -74.03, -73.75
+    min_lat, max_lat = 40.63, 40.85
+
+    df_trips = df_trips.filter(
+        (F.col("passenger_count") > 0) &
+        (F.col("passenger_count") <= 6) &
+        (F.col("trip_distance") > 0) &
+        (F.col("trip_time_in_secs") > 0) &
+        (F.col("pickup_longitude") >= min_lon) & (F.col("pickup_longitude") <= max_lon) &
+        (F.col("pickup_latitude") >= min_lat) & (F.col("pickup_latitude") <= max_lat) &
+        (F.col("dropoff_longitude") >= min_lon) & (F.col("dropoff_longitude") <= max_lon) &
+        (F.col("dropoff_latitude") >= min_lat) & (F.col("dropoff_latitude") <= max_lat)
+    )
+
+    df_trips = df_trips.drop("store_and_fwd_flag")
+    df_fares = df_fares.drop("mta_tax")
+
+    df_trips = df_trips.dropDuplicates().dropna()
+    df_fares = df_fares.dropDuplicates().dropna()
+    print("\nЗавершення попередню обробку даних\n")
+    return df_trips, df_fares
